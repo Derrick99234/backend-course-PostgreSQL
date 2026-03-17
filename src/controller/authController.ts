@@ -2,6 +2,7 @@ import express from "express";
 import { prisma } from "../config/db.ts";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { generateToken } from "../utils/generatetoken.ts";
 
 const register = async (req: express.Request, res: express.Response) => {
   const { name, email, password } = req.body;
@@ -58,6 +59,8 @@ const login = async (req: express.Request, res: express.Response) => {
     return res.status(400).json({ message: "Invalid email or password" });
   }
 
+  const token = generateToken(user.id, res);
+
   res.status(200).json({
     status: "success",
     message: "User logged in successfully",
@@ -68,7 +71,19 @@ const login = async (req: express.Request, res: express.Response) => {
         email: user.email,
       },
     },
+    token,
   });
 };
 
-export { register, login };
+const logout = async (req: express.Request, res: express.Response) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({
+    status: "success",
+    message: "User logged out successfully",
+  });
+};
+
+export { register, login, logout };
