@@ -76,9 +76,10 @@ const login = async (req: express.Request, res: express.Response) => {
 };
 
 const logout = async (req: express.Request, res: express.Response) => {
-  res.cookie("token", "", {
+  res.clearCookie("token", {
     httpOnly: true,
-    expires: new Date(0),
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
   });
   res.status(200).json({
     status: "success",
